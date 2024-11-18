@@ -9,8 +9,8 @@
  */
 import {
   BaseDoEntity, BookmarkAdapter, bookmarks, ButtonTile, ChildModelOf, Constructor, dataObjects, DefaultBookmarkAdapter, DoEntity, EnumObject, Event, EventHandler, EventListener, EventMapOf, EventModel, EventSupport, Form, HtmlComponent,
-  icons, InitModelOf, inspector, Menu, MenuBar, menus, ObjectFactory, ObjectOrChildModel, ObjectUuidProvider, ObjectWithBookmarkAdapter, ObjectWithUuid, Outline, PageEventMap, PageIdDummyPageParamDo, PageModel, PropertyChangeEvent, scout,
-  strings, Table, TableRow, TableRowClickEvent, TileOutlineOverview, TileOverviewForm, TreeNode, Widget
+  icons, InitModelOf, inspector, Menu, MenuBar, menus, ObjectOrChildModel, ObjectUuidProvider, ObjectWithBookmarkAdapter, ObjectWithUuid, Outline, PageEventMap, PageIdDummyPageParamDo, PageModel, PropertyChangeEvent, scout, strings, Table,
+  TableRow, TableRowClickEvent, TileOutlineOverview, TileOverviewForm, TreeNode, Widget
 } from '../../../index';
 import $ from 'jquery';
 
@@ -615,19 +615,11 @@ export class Page extends TreeNode implements PageModel, ObjectWithUuid, ObjectW
     return this._pageParamInternal;
   }
 
-  set pageParam(pageParam: PageParamDo) {
+  set pageParam(pageParam: PageParamDo | object) {
     if (pageParam instanceof BaseDoEntity || !pageParam) {
       this._pageParamInternal = pageParam;
     } else {
-      let pageParamModel = dataObjects.deserialize(pageParam, BaseDoEntity);
-      if ((!pageParamModel.objectType || pageParamModel.objectType === 'BaseDoEntity') && this.pageParamType) {
-        // Reconstruct objectType from @pageParam decoration
-        pageParamModel.objectType = ObjectFactory.get().getObjectType(this.pageParamType);
-        if (!pageParamModel.objectType) {
-          throw new Error(`Unknown object type for @pageParam type "${this.pageParamType}"`);
-        }
-      }
-      this._pageParamInternal = scout.create(pageParamModel);
+      this._pageParamInternal = dataObjects.deserialize(pageParam, this.pageParamType || BaseDoEntity);
     }
   }
 

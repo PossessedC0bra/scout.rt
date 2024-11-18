@@ -35,8 +35,7 @@ export class DoSerializer {
     const detectedObjectType = this._detectObjectType(value);
     let objectType = metaData?.type;
     if (objectType) {
-      // a type is given from data value and from metadata of the parent object: validate they are the same
-      doValueMetaData.assertSame(detectedObjectType, objectType);
+      doValueMetaData.assertTypesCompatible(detectedObjectType, objectType);
     } else {
       objectType = detectedObjectType;
     }

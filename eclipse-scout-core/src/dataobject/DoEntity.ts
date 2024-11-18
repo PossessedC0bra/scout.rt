@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import {Constructor, objects, ObjectType, ObjectWithType, scout} from '../index';
+import {Constructor, objects, scout} from '../index';
 
 /**
  * Base interface for all data objects.
@@ -20,11 +20,10 @@ export interface DoEntity {
   _typeVersion?: string;
 }
 
-export class BaseDoEntity implements ObjectWithType, DoEntity, BaseDoEntityModel {
+export class BaseDoEntity implements DoEntity, BaseDoEntityModel {
   declare model: Partial<this> | BaseDoEntityModel;
 
   _type?: string;
-  objectType: string;
 
   init(model: any) {
     if (objects.isPojo(model)) {
@@ -46,8 +45,6 @@ export class BaseDoEntity implements ObjectWithType, DoEntity, BaseDoEntityModel
 }
 
 export interface BaseDoEntityModel {
-  objectType?: ObjectType;
-
   [property: string]: any; // allow custom properties
 }
 

@@ -54,12 +54,15 @@ export const doValueMetaData = {
     return TypeDescriptor.resolveType(objectType, {variantLenient: true});
   },
 
-  assertSame(detectedFromValue: Constructor, passedFromMeta: Constructor) {
-    if (detectedFromValue && passedFromMeta && detectedFromValue !== passedFromMeta) {
-      const objectFactory = ObjectFactory.get();
-      const inObject = objectFactory.getObjectType(detectedFromValue) || detectedFromValue;
-      const inMeta = objectFactory.getObjectType(passedFromMeta) || passedFromMeta;
-      throw new Error(`Incompatible types: object contains '${inObject}' but '${inMeta}' was expected.`);
+  /**
+   * Checks if `actualType` is instanceof `declaredType`.
+   */
+  // FIXME mvi [js-bookmark] Improve documentation
+  assertTypesCompatible(actualType: Constructor, declaredType: Constructor) {
+    if (actualType && declaredType && actualType !== declaredType && !declaredType.isPrototypeOf(actualType)) {
+      const actual = ObjectFactory.get().getObjectType(actualType) || actualType;
+      const declared = ObjectFactory.get().getObjectType(declaredType) || declaredType;
+      throw new Error(`Incompatible types: actual type '${actual}' is not assignable to declared type '${declared}'.`);
     }
   }
 };

@@ -29,9 +29,10 @@ export class DoDeserializer {
 
   protected _deserializeObject<T extends object>(rawObj: Record<string, any>, metaData?: DoValueMetaData<T>): T {
     const detectedClass = this._detectClass(rawObj) as Constructor<T>;
+
     let constructor = metaData?.type as Constructor<T>;
     if (constructor) {
-      doValueMetaData.assertSame(detectedClass, constructor);
+      doValueMetaData.assertTypesCompatible(detectedClass, constructor);
     } else if (detectedClass) {
       constructor = detectedClass;
     } else {
@@ -39,6 +40,7 @@ export class DoDeserializer {
     }
 
     const resultObj = scout.create(constructor, null /* must always be possible to create a DO without model */, {ensureUniqueId: false});
+    delete resultObj['objectType']; // objectType is not relevant for deserialized DOs
     if (BaseDoEntity === constructor && rawObj._type) {
       resultObj['_type'] = rawObj._type; // keep _type for BaseDoEntity. This is required for DOs which only exist on the backend.
     }

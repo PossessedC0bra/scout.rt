@@ -13,26 +13,32 @@ import {
 
 export const dataObjects = {
 
-  serializers: [new DateDoNodeSerializer(), new IdDoNodeSerializer(), new MapDoNodeSerializer(), new SetDoNodeSerializer(), new ArrayDoNodeSerializer()] as DoNodeSerializer<any>[],
+  serializers: [
+    new DateDoNodeSerializer(),
+    new IdDoNodeSerializer(),
+    new MapDoNodeSerializer(),
+    new SetDoNodeSerializer(),
+    new ArrayDoNodeSerializer()
+  ] as DoNodeSerializer<any>[],
 
   equals(a: DoEntity, b: DoEntity): boolean {
     // FIXME mvi [js-bookmark] implement
     return false;
   },
 
-  stringify(dataobject: any): string {
-    const serialized = dataObjects.serialize(dataobject);
+  stringify(dataObject: any): string {
+    const serialized = dataObjects.serialize(dataObject);
     if (!serialized) {
       return null;
     }
     return JSON.stringify(serialized);
   },
 
-  serialize(dataobject: any): any {
-    if (!dataobject) {
+  serialize(dataObject: any): any {
+    if (!dataObject) {
       return null;
     }
-    return scout.create(DoSerializer).serialize(dataobject);
+    return scout.create(DoSerializer).serialize(dataObject);
   },
 
   parse<T extends DoEntity>(json: string, objectType?: ObjectType<T>): T {

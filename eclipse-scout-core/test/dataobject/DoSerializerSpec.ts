@@ -57,6 +57,11 @@ describe('DoSerializer', () => {
     const s = new Set();
     s.add(s);
     expect(() => dataObjects.serialize({s})).toThrowMatching((e: Error) => e.message.includes('[s]'));
+
+    // does not fail if the same object exists multiple times
+    const existsMultipleTimes = {id: 123};
+    let data = {a: existsMultipleTimes, b: existsMultipleTimes};
+    expect(dataObjects.stringify(data)).toBe('{"a":{"id":123},"b":{"id":123}}');
   });
 
   it('can serialize based on instance type', () => {

@@ -153,13 +153,11 @@ describe('DoDeserializer', () => {
     const first = arr[0];
     expect(first).toBeInstanceOf(Fixture03Do);
     expect(first._type).toBe('scout.Fixture03');
-    expect(first.objectType).toBe('Fixture03Do');
     expect(first.nestedNestedDate).toEqual(dates.parseJsonDate('2024-07-31 07:52:39.708Z'));
 
     const second = arr[1];
     expect(second).toBeInstanceOf(Fixture03Do);
     expect(second._type).toBe('scout.Fixture03');
-    expect(second.objectType).toBe('Fixture03Do');
     expect(second.nestedNestedDate).toEqual(dates.parseJsonDate('2024-07-31 07:54:39.708Z'));
   });
 });

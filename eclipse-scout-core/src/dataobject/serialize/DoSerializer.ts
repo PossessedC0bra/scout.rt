@@ -15,20 +15,23 @@ export class DoSerializer {
 
   serialize(value: any, valueMetaData?: DoValueMetaData): any {
     this.cycleDetector.push(value);
-    const serializer = dataObjects.serializers.find(s => s.canSerialize(value, valueMetaData));
-    if (serializer) {
-      // use custom serializer
-      return serializer.serialize(value, valueMetaData, this);
-    }
-    if (objects.isNullOrUndefined(value)) {
+    try {
+      const serializer = dataObjects.serializers.find(s => s.canSerialize(value, valueMetaData));
+      if (serializer) {
+        // use custom serializer
+        return serializer.serialize(value, valueMetaData, this);
+      }
+      if (objects.isNullOrUndefined(value)) {
+        return value;
+      }
+      if (objects.isObject(value)) {
+        // nested object
+        return this._serializeObject(value, valueMetaData);
+      }
       return value;
+    } finally {
+      this.cycleDetector.pop(value);
     }
-    if (objects.isObject(value)) {
-      // nested object
-      return this._serializeObject(value, valueMetaData);
-    }
-    this.cycleDetector.pop(value);
-    return value;
   }
 
   protected _serializeObject(value: any, metaData?: DoValueMetaData): any {

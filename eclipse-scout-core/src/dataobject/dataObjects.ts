@@ -36,7 +36,7 @@ export const dataObjects = {
     return scout.create(DoSerializer).serialize(dataObject);
   },
 
-  parse<T extends DoEntity>(json: string, objectType?: ObjectType<T>): T {
+  parse<T extends DoEntity | DoEntity[]>(json: string, objectType?: ObjectType<T>): T {
     if (!json) {
       return null;
     }
@@ -44,7 +44,7 @@ export const dataObjects = {
     return dataObjects.deserialize(value, objectType);
   },
 
-  deserialize<T extends DoEntity>(obj: any, objectType?: ObjectType<T>): T {
+  deserialize<T extends DoEntity | DoEntity[]>(obj: any, objectType?: ObjectType<T>): T {
     if (!obj) {
       return null;
     }

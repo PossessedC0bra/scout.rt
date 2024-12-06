@@ -28,6 +28,9 @@ export class StringId<TTypeName extends string> extends Id<string, TTypeName> {
   }
 
   static of<TTypeName extends string>(value: string, typeName?: TTypeName, signature?: string): StringId<TTypeName> {
+    if (!value) {
+      return null;
+    }
     return scout.create(StringId<TTypeName>, {value, typeName, signature}, {ensureUniqueId: false});
   }
 }

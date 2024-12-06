@@ -11,17 +11,16 @@ import {Constructor, DoDeserializer, DoNodeSerializer, DoSerializer, DoValueMeta
 
 export class IdDoNodeSerializer implements DoNodeSerializer<Id<any>> {
 
-  idParser: IdParser; // created on first use
+  protected static _ID_PARSER: IdParser; // created on first use. Access using IdDoNodeSerializer._getIdParser()
 
   canSerialize(value: any, metaData: DoValueMetaData): boolean {
     return value instanceof Id;
   }
 
   serialize(value: Id<any>, metaData: DoValueMetaData, serializer: DoSerializer): any {
-    const isConcrete = !!this.detectConcreteTypeName(metaData);
-    if (isConcrete) {
-      return value.toUnqualified();
-    }
+    // It's not possible to perfectly compute if the backend expects a qualified or unqualified id (if the Java DoNode is concrete or not, see ScoutDataObjectSerializerProvider.java).
+    // Therefore, always serialize qualified, which might include too much information.
+    // If the Java deserializer uses unqualified parsing, the unnecessary extra information is removed (see IdCodec.java#fromUnqualifiedUnchecked).
     return value.toQualified();
   }
 
@@ -36,12 +35,7 @@ export class IdDoNodeSerializer implements DoNodeSerializer<Id<any>> {
   }
 
   deserialize(rawId: string, metaData: DoValueMetaData, deserializer: DoDeserializer): Id<any> {
-    const idParser = this._getIdParser();
-    const idTypeName = this.detectConcreteTypeName(metaData);
-    if (idTypeName) {
-      return idParser.fromUnQualified(metaData.type, rawId, idTypeName);
-    }
-    return idParser.fromQualified(metaData.type, rawId);
+    return IdDoNodeSerializer._getIdParser().parse(metaData.type, rawId, () => this.detectConcreteTypeName(metaData));
   }
 
   isIdClass(candidate: Constructor) {
@@ -75,10 +69,10 @@ export class IdDoNodeSerializer implements DoNodeSerializer<Id<any>> {
     return metaData.type['parseTypeName'](metaData);
   }
 
-  protected _getIdParser(): IdParser {
-    if (!this.idParser) {
-      this.idParser = scout.create(IdParser);
+  protected static _getIdParser(): IdParser {
+    if (!IdDoNodeSerializer._ID_PARSER) {
+      IdDoNodeSerializer._ID_PARSER = scout.create(IdParser);
     }
-    return this.idParser;
+    return IdDoNodeSerializer._ID_PARSER;
   }
 }

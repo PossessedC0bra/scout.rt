@@ -77,7 +77,7 @@ export class CodeTypeCache extends EventEmitter implements ObjectModel<CodeTypeC
     this._call?.abort(); // abort in case there is already a call running
     this._call = ajax.createCallJson({
       url: this.url,
-      type: 'PUT',
+      method: 'PUT',
       data: JSON.stringify(request)
     }, {
       maxRetries: -1, // unlimited retries, ensure the cache will be updated eventually in case of network errors

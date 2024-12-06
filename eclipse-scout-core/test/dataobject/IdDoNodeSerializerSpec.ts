@@ -12,22 +12,6 @@ import {BaseDoEntity, CompositeId, CompositeIdComponentType, dataObjects, DoRegi
 
 describe('IdDoNodeSerializer', () => {
 
-  const idFixture01DoJson = JSON.stringify(JSON.parse(`{
-      "_type": "scout.IdFixture01",
-      "concreteUuid": "07e51622-5a1d-4b52-894c-f987a7a16603",
-      "unConcreteUuid": "scout.SampleUuid2:d4e2a738-c5e1-415a-8ebb-c3f01446a7df",
-      "unConcreteUuidAny": "scout.SampleUuid3:e22ba8b4-005e-45c1-9474-bacd54937371",
-      "unConcreteUuidNoGeneric": "scout.SampleUuid4:350d7435-a885-49e4-9235-f62e09ec7250",
-      "concreteStringId": "sampleStringId1",
-      "unConcreteStringId": "scout.SampleStringId2:sampleStringId2",
-      "concreteLongId": "1234###signature",
-      "unConcreteLongId": "scout.SampleLongId2:5678###signature",
-      "customIdClass": "testIdValue;true;456",
-      "abstractId": "scout.AbstractNumberId:444###sig",
-      "compositeId": "7690f488-a29a-4e13-a977-34814e32c673;1234;###sig"
-    }
-   `));
-
   beforeAll(() => {
     ObjectFactory.get().registerNamespace('scout', {IdFixture01Do, TestId, TestCompositeId}, {allowedReplacements: ['scout.IdFixture01Do', 'scout.TestId', 'scout.TestCompositeId']});
     const doRegistry = DoRegistry.get();
@@ -56,10 +40,40 @@ describe('IdDoNodeSerializer', () => {
       compositeId: TestCompositeId.of('7690f488-a29a-4e13-a977-34814e32c673', '1234', '')
     });
     const json = dataObjects.stringify(fixture);
-    expect(json).toBe(idFixture01DoJson);
+    const expected = JSON.stringify(JSON.parse(`{
+      "_type": "scout.IdFixture01",
+      "concreteUuid": "scout.SampleUuid:07e51622-5a1d-4b52-894c-f987a7a16603",
+      "unConcreteUuid": "scout.SampleUuid2:d4e2a738-c5e1-415a-8ebb-c3f01446a7df",
+      "unConcreteUuidAny": "scout.SampleUuid3:e22ba8b4-005e-45c1-9474-bacd54937371",
+      "unConcreteUuidNoGeneric": "scout.SampleUuid4:350d7435-a885-49e4-9235-f62e09ec7250",
+      "concreteStringId": "scout.SampleStringId:sampleStringId1",
+      "unConcreteStringId": "scout.SampleStringId2:sampleStringId2",
+      "concreteLongId": "scout.SampleLongId:1234###signature",
+      "unConcreteLongId": "scout.SampleLongId2:5678###signature",
+      "customIdClass": "scout.TestIdTypeName:testIdValue;true;456",
+      "abstractId": "scout.AbstractNumberId:444###sig",
+      "compositeId": "scout.CompositeId:7690f488-a29a-4e13-a977-34814e32c673;1234;###sig"
+    }
+   `));
+    expect(json).toBe(expected);
   });
 
   it('can deserialize Ids', () => {
+    const idFixture01DoJson = JSON.stringify(JSON.parse(`{
+      "_type": "scout.IdFixture01",
+      "concreteUuid": "07e51622-5a1d-4b52-894c-f987a7a16603",
+      "unConcreteUuid": "scout.SampleUuid2:d4e2a738-c5e1-415a-8ebb-c3f01446a7df",
+      "unConcreteUuidAny": "scout.SampleUuid3:e22ba8b4-005e-45c1-9474-bacd54937371",
+      "unConcreteUuidNoGeneric": "scout.SampleUuid4:350d7435-a885-49e4-9235-f62e09ec7250",
+      "concreteStringId": "sampleStringId1",
+      "unConcreteStringId": "scout.SampleStringId2:sampleStringId2",
+      "concreteLongId": "1234###signature",
+      "unConcreteLongId": "scout.SampleLongId2:5678###signature",
+      "customIdClass": "testIdValue;true;456",
+      "abstractId": "scout.AbstractNumberId:444###sig",
+      "compositeId": "7690f488-a29a-4e13-a977-34814e32c673;1234;###sig"
+    }
+   `));
     const fixture = dataObjects.parse(idFixture01DoJson, IdFixture01Do);
     expect(fixture).toBeInstanceOf(IdFixture01Do);
 

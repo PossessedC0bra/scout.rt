@@ -19,6 +19,17 @@ export class IdParser implements ObjectWithType {
 
   objectType: string;
 
+  parse<TIdType extends Id<TValueType, TTypeName>, TTypeName extends string, TValueType>(idObjectType: ObjectType<TIdType>, value: string, typeNameProvider?: () => string): TIdType {
+    if (strings.empty(value)) {
+      throw new Error('Id value is mandatory.');
+    }
+    const isQualified = strings.contains(value, IdParser.ID_TYPENAME_DELIMITER);
+    if (isQualified) {
+      return this.fromQualified(idObjectType, value);
+    }
+    return this.fromUnQualified(idObjectType, value, typeNameProvider());
+  }
+
   fromUnQualified<TIdType extends Id<TValueType, TTypeName>, TTypeName extends string, TValueType>(idObjectType: ObjectType<TIdType>, value: string, typeName: string): TIdType {
     if (strings.empty(value)) {
       throw new Error('Id value is mandatory.');

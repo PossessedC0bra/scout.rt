@@ -31,6 +31,9 @@ export class NumberId<TTypeName extends string> extends Id<number, TTypeName> {
   }
 
   static of<TTypeName extends string>(value: number, typeName?: TTypeName, signature?: string): NumberId<TTypeName> {
+    if (!value) {
+      return null;
+    }
     return scout.create(NumberId<TTypeName>, {value, typeName, signature}, {ensureUniqueId: false});
   }
 }

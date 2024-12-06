@@ -89,7 +89,7 @@ export class AccessControl extends PropertyEventEmitter implements AccessControl
     this._call?.abort(); // abort in case there is already a call running
     this._call = ajax.createCallJson({
       url: this.permissionsUrl,
-      type: 'GET',
+      method: 'GET',
       cache: true
     }, {
       maxRetries: -1, // unlimited retries

@@ -18,7 +18,7 @@ export class DoRegistry {
 
   init() {
     ObjectFactory.get()
-      .getClassesInstanceOf(BaseDoEntity)
+      .getSubClassesOf(BaseDoEntity)
       .forEach(doClass => this.add(doClass));
   }
 

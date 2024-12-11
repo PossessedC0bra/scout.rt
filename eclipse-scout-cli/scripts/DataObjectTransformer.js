@@ -114,7 +114,7 @@ module.exports = class DataObjectTransformer {
       return ts.factory.createIdentifier(name); // Use directly the constructor for known types like Date, Number, String, Boolean, Map, Set, Array
     }
 
-    const namespace = this._detectNamespaceFor(node);
+    const namespace = 'Record' === name ? null : this._detectNamespaceFor(node);
     const qualifiedName = (!namespace || namespace === 'scout') ? name : namespace + '.' + name;
     // use objectType as string because e.g. of TS interfaces (which do not exist at RT) and that overwrites in ObjectFactory are taken into account.
     return ts.factory.createStringLiteral(qualifiedName);

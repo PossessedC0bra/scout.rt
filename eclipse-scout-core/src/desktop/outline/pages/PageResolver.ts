@@ -66,7 +66,7 @@ export class PageResolver {
     }
     if (!this.pageByPageParam) {
       const mapping = new Map<Constructor<PageParamDo>, Constructor<Page>>();
-      const allPageClasses = ObjectFactory.get().getClassesInstanceOf(Page);
+      const allPageClasses = ObjectFactory.get().getSubClassesOf(Page);
       for (let PageConstructor of allPageClasses) {
         let pageParamType = (new PageConstructor()).pageParamType;
         if (pageParamType !== null && pageParamType !== PageIdDummyPageParamDo) {
@@ -82,7 +82,7 @@ export class PageResolver {
     if (!pageParam) {
       return null;
     }
-    const allPageClasses = ObjectFactory.get().getClassesInstanceOf(Page);
+    const allPageClasses = ObjectFactory.get().getSubClassesOf(Page);
     const parent = scout.create(Outline, {parent: App.get().sessions[0].desktop});
     try {
       for (let candidate of allPageClasses) {

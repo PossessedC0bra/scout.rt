@@ -192,12 +192,11 @@ export class PageWithTable extends Page implements PageWithTableModel {
    * The contribution is only added if there is a row limit. Otherwise, the request remains untouched.
    * @example
    * protected override _loadTableData(searchFilter: MyRestrictionDo): JQuery.Promise<MyResponseDo> {
-   *   const request: MyRequestDo = {
-   *     id: '1',
-   *     ...
-   *     restriction: searchFilter
-   *   };
-   *   return ajax.postJson(url, this._withMaxRowCountContribution(request));
+   *   const request = scout.create(MyRequestDo, {
+   *       ...
+   *       restriction: searchFilter
+   *   });
+   *   return ajax.postDataObject(this._withMaxRowCountContribution(request), url);
    * }
    * @param dataObject The {@link DoEntity} to which the contribution should be added.
    * @returns the resulting request with the added contribution.

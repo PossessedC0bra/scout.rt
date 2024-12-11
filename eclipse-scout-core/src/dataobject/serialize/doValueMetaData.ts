@@ -57,7 +57,6 @@ export const doValueMetaData = {
   /**
    * Checks if `actualType` is instanceof `declaredType`.
    */
-  // FIXME mvi [js-bookmark] Improve documentation
   assertTypesCompatible(actualType: Constructor, declaredType: Constructor) {
     if (actualType && declaredType && actualType !== declaredType && !declaredType.isPrototypeOf(actualType)) {
       const actual = ObjectFactory.get().getObjectType(actualType) || actualType;

@@ -240,7 +240,12 @@ export class ObjectFactory {
     return this._objectTypeMap.get(Class);
   }
 
-  getClassesInstanceOf<T extends object>(baseClass: Constructor<T> | AbstractConstructor<T>): Constructor<T>[] {
+  /**
+   * @param baseClass The base class (exclusive) for which all known subclasses should be returned.
+   * @returns All classes that have the given class in their super hierarchy. The given baseClass is not part of the result.
+   * More formally: all constructors known to this factory that have the given class in their prototype chain.
+   */
+  getSubClassesOf<T extends object>(baseClass: Constructor<T> | AbstractConstructor<T>): Constructor<T>[] {
     const result: Constructor<T>[] = [];
     if (!baseClass) {
       return result;

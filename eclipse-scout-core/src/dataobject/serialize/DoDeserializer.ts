@@ -31,11 +31,15 @@ export class DoDeserializer {
     const detectedClass = this._detectClass(rawObj) as Constructor<T>;
 
     let constructor = metaData?.type as Constructor<T>;
-    if (constructor) {
+    if (constructor && detectedClass) {
+      // if both is present: check compatibility and use the one from _type attribute (might be a subclass of the one in the source code)
       doValueMetaData.assertTypesCompatible(detectedClass, constructor);
-    } else if (detectedClass) {
       constructor = detectedClass;
-    } else {
+    } else if (detectedClass) {
+      // no metadata: use from _type attribute
+      constructor = detectedClass;
+    } else if (!constructor) {
+      // default DO if no _type attribute and no metadata is available
       constructor = BaseDoEntity as Constructor<T>;
     }
 
@@ -47,7 +51,7 @@ export class DoDeserializer {
 
     const proto = Object.getPrototypeOf(constructor).prototype;
     Object.keys(rawObj)
-      .filter(key => key !== '_type' && key !== 'objectType') // Ignore _type and objectType from source object as these attributes are already correctly set here. Keep _typeVersion in case the DO is sent to the backend again.
+      .filter(key => key !== '_type') // Ignore _type from source object as these attributes are already correctly set here. Keep _typeVersion in case the DO is sent to the backend again.
       .forEach(key => {
         resultObj[key] = this._convertFieldValue(proto, rawObj, key, rawObj[key]);
       });

@@ -21,11 +21,6 @@ export const dataObjects = {
     new ArrayDoNodeSerializer()
   ] as DoNodeSerializer<any>[],
 
-  equals(a: DoEntity, b: DoEntity): boolean {
-    // FIXME mvi [js-bookmark] implement
-    return false;
-  },
-
   stringify(dataObject: any): string {
     const serialized = dataObjects.serialize(dataObject);
     if (!serialized) {

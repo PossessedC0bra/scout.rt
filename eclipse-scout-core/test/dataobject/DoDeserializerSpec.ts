@@ -13,13 +13,14 @@ describe('DoDeserializer', () => {
 
   beforeAll(() => {
     ObjectFactory.get().registerNamespace('scout', {
-      Fixture01Do, Fixture02Do, Fixture03Do
-    }, {allowedReplacements: ['scout.Fixture01Do', 'scout.Fixture02Do', 'scout.Fixture03Do']});
+      Fixture01Do, Fixture02Do, Fixture03Do, Fixture03SubDo
+    }, {allowedReplacements: ['scout.Fixture01Do', 'scout.Fixture02Do', 'scout.Fixture03Do', 'scout.Fixture03SubDo']});
 
     const doRegistry = DoRegistry.get();
     doRegistry.add(Fixture01Do);
     doRegistry.add(Fixture02Do);
     doRegistry.add(Fixture03Do);
+    doRegistry.add(Fixture03SubDo);
   });
 
   afterAll(() => {
@@ -27,6 +28,7 @@ describe('DoDeserializer', () => {
     doRegistry.removeByClass(Fixture01Do);
     doRegistry.removeByClass(Fixture02Do);
     doRegistry.removeByClass(Fixture03Do);
+    doRegistry.removeByClass(Fixture03SubDo);
   });
 
   it('can deserialize based on _type', () => {
@@ -160,6 +162,26 @@ describe('DoDeserializer', () => {
     expect(second._type).toBe('scout.Fixture03');
     expect(second.nestedNestedDate).toEqual(dates.parseJsonDate('2024-07-31 07:54:39.708Z'));
   });
+
+  it('can deserialize if _type is a subtype of declared type', () => {
+    const json = `{
+      "_type": "scout.Fixture02",
+      "nestedDate": "2024-12-12 07:52:39.708Z",
+      "objectType": "scout.TestObjectType",
+      "nestedObj": {
+        "_type": "scout.Fixture03Sub",
+        "nestedNestedDateSub": "2024-12-12 08:03:39.708Z"
+      }
+    }
+    `;
+    const fixture02 = dataObjects.parse(json) as Fixture02Do;
+    expect(fixture02).toBeInstanceOf(Fixture02Do);
+    expect(fixture02.nestedDate).toEqual(dates.parseJsonDate('2024-12-12 07:52:39.708Z'));
+    expect(fixture02['objectType']).toBe('scout.TestObjectType'); // objectType is preserved. Required e.g. for CodeTypes which may have objectType property coming from the backend
+    const fixture03Sub = fixture02.nestedObj as Fixture03SubDo;
+    expect(fixture03Sub).toBeInstanceOf(Fixture03SubDo); // subtype of type declared in Fixture02Do is used
+    expect(fixture03Sub.nestedNestedDateSub).toEqual(dates.parseJsonDate('2024-12-12 08:03:39.708Z'));
+  });
 });
 
 @typeName('scout.Fixture01')
@@ -188,4 +210,9 @@ export interface FixtureDoIfc {
 @typeName('scout.Fixture03')
 export class Fixture03Do extends BaseDoEntity implements FixtureDoIfc {
   nestedNestedDate: Date;
+}
+
+@typeName('scout.Fixture03Sub')
+export class Fixture03SubDo extends Fixture03Do {
+  nestedNestedDateSub: Date;
 }

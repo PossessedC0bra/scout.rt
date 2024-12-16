@@ -2338,6 +2338,8 @@ export class Tree extends Widget implements TreeModel, Filterable<TreeNode> {
         this._renderExpansion(parentNode, opts);
         this.ensureExpansionVisible(parentNode);
       }
+      // FIXME bsh [hybrid-page] When nodes are inserted (either manually or via load), assume that the children are now loaded
+      parentNode.childrenLoaded = true;
     } else {
       if (this.nodes.length > 0) {
         treeNodes.forEach(entry => {

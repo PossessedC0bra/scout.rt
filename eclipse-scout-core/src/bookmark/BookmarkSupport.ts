@@ -354,9 +354,21 @@ export class BookmarkSupport implements ObjectWithType, BookmarkSupportModel {
           }
         }
 
-        return page.loadChildren()
+        return this._loadChildren(page)
           .then(() => this._resolveNextPageInPath(pagePath, page, expandedChildRow));
       });
+  }
+
+  protected _loadChildren(page: Page): JQuery.Promise<any> {
+    if (page['remote']) {
+      console.log(`Load children remote [page=${page.id}]`);
+      return HybridManager.get(this.session, true)
+        .then(hybridManager =>
+          hybridManager.callActionAndWait('EnsureChildrenLoaded', undefined, scout.create(HybridActionContextElements)
+            .withElement('page', HybridActionContextElement.of(page.getOutline(), page))));
+    }
+    console.log(`Load children local [page=${page.id}]`);
+    return page.loadChildren();
   }
 
   protected _resolvePage(pageDefinition: IBookmarkPageDo, parent: Page | Outline, parentRowBookmarkIdentifier: BookmarkTableRowIdentifierDo): JQuery.Promise<Page> {
@@ -373,7 +385,7 @@ export class BookmarkSupport implements ObjectWithType, BookmarkSupportModel {
             parent.ensureDetailTable(); // FIXME bsh [js-bookmark] This does not work for classic pages!!!
             // Lookup child page by parent PK (ignore PageParam)
             let normalizedParentRowIdentifier = bookmarks.stringifyNormalized(parentRowBookmarkIdentifier);
-            let row = parent.detailTable.rows.find(row => {
+            let row = parent.detailTable?.rows.find(row => {
               let normalizedRowIdentifier = bookmarks.stringifyNormalized(row.bookmarkIdentifier);
               return normalizedRowIdentifier === normalizedParentRowIdentifier;
             });

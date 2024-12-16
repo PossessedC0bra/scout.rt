@@ -171,7 +171,8 @@ export class TreeAdapter extends ModelAdapter {
     }
     this.addFilterForWidgetEventType('nodesSelected');
     this.addFilterForWidgetEventType('nodesChecked');
-    let nodes = this.widget.nodesByIds(nodeIds);
+    // FIXME bsh [hybrid-page] Can we solve this differently? This prevents errors when nodes are deleted in the browser (the delete event is sent back from the UI server)
+    let nodes = this.widget.nodesByIds(nodeIds).filter(Boolean);
     this.widget.deleteNodes(nodes, parentNode);
   }
 

@@ -278,7 +278,14 @@ export class OutlineAdapter extends TreeAdapter {
         parent: nodeModel.parent,
         owner: nodeModel.owner,
         objectType: nodeModel.jsPageObjectType,
+        // FIXME bsh [hybrid-page]: We need a better solution for this. Why don't we simply inherit the entire page model?
+        //   It seems wrong to duplicate them all on the "jsPageModel" object. But for this to work, we have to adjust the
+        //   JS page models to only specify properties they want to have overwritten (e.g. don't specify ID).
         text: nodeModel.text || undefined // because summary column might come from Java parent page
+        ,
+        childNodes: nodeModel.childNodes,
+        expanded: nodeModel.expanded,
+        expandedLazy: nodeModel.expandedLazy
       };
 
       if (nodeModel.jsPageModel) {

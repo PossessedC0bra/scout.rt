@@ -23,6 +23,7 @@ export class HybridManagerAdapter extends ModelAdapter {
   }
 
   protected _onHybridEvent(event: HybridRemoteEvent) {
+    console.log(`% Receive hybrid action: ${event.eventType} [id=${event.id}, ce=${JSON.stringify(event.contextElements)}]`);
     let contextElements = this._jsonToContextElements(event.contextElements);
     this.widget.onHybridEvent(event.id, event.eventType, event.data, contextElements);
   }
@@ -47,6 +48,7 @@ export class HybridManagerAdapter extends ModelAdapter {
       event.data.data['_page'] = outline.modelAdapter.id + '/' + page.id;
     }
     let contextElements = this._contextElementsToJson(event.data.contextElements);
+    console.log(`# Send hybrid action: ${event.data.actionType} [id=${event.data.id}, ce=${JSON.stringify(contextElements)}]`);
     this._send('hybridAction', {
       actionType: event.data.actionType, // add as first property (devtools sometimes show properties in that order)
       id: event.data.id,

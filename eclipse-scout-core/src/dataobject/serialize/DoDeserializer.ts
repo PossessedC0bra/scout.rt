@@ -52,6 +52,7 @@ export class DoDeserializer {
     const proto = Object.getPrototypeOf(constructor).prototype;
     Object.keys(rawObj)
       .filter(key => key !== '_type') // Ignore _type from source object as these attributes are already correctly set here. Keep _typeVersion in case the DO is sent to the backend again.
+      // FIXME bsh [hybrid-page] Why should we need to send the _typeVersion back? It is only necessary for data migration. The only use case would be "local storage" - do we really need this?
       .forEach(key => {
         resultObj[key] = this._convertFieldValue(proto, rawObj, key, rawObj[key]);
       });

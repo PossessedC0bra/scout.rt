@@ -310,7 +310,7 @@ export class ErrorHandler implements ErrorHandlerModel, ObjectWithType {
       }
     }
 
-    let ajaxRequest = (requestOptions ? strings.join(' ', requestOptions.type, requestOptions.url) : '');
+    let ajaxRequest = (requestOptions ? strings.join(' ', requestOptions.method || requestOptions.type, requestOptions.url) : '');
     let ajaxStatus = (jqXHR.status ? strings.join(' ', jqXHR.status + '', errorThrown) : 'Connection error');
 
     errorInfo.httpStatus = jqXHR.status || 0;

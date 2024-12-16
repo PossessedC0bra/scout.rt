@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {DoEntity, Event, ModelAdapter, RemoteEvent, UiCallbackResponseEvent, UiCallbacks, Widget} from '../../../index';
+import {dataObjects, DoEntity, Event, ModelAdapter, RemoteEvent, UiCallbackResponseEvent, UiCallbacks, Widget} from '../../../index';
 
 export class UiCallbacksAdapter extends ModelAdapter {
   declare widget: UiCallbacks;
@@ -42,7 +42,7 @@ export class UiCallbacksAdapter extends ModelAdapter {
 
   protected _onUiResponse(event: UiCallbackResponseEvent) {
     let response = event.data;
-    this._send('uiResponse', response);
+    this._send('uiResponse', dataObjects.serialize(response));
   }
 }
 

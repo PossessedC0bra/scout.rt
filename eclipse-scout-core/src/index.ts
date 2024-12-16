@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
+import 'reflect-metadata/lite';
 import {ObjectFactory} from './ObjectFactory';
 
 export * from './scout';
@@ -110,6 +110,25 @@ export * from './util/webstorage';
 export * from './util/cookies';
 export * from './util/ViewportScroller';
 export * from './util/ViewportScrollerModel';
+export * from './id/Id';
+export * from './id/IdParser';
+export * from './id/UuId';
+export * from './id/StringId';
+export * from './id/CompositeId';
+export * from './id/NumberId';
+export * from './dataobject/DoEntity';
+export * from './dataobject/serialize/DoNodeSerializer';
+export * from './dataobject/serialize/DateDoNodeSerializer';
+export * from './dataobject/serialize/IdDoNodeSerializer';
+export * from './dataobject/serialize/MapDoNodeSerializer';
+export * from './dataobject/serialize/ArrayDoNodeSerializer';
+export * from './dataobject/serialize/SetDoNodeSerializer';
+export * from './dataobject/serialize/DoDeserializer';
+export * from './dataobject/serialize/DoSerializer';
+export * from './dataobject/serialize/doValueMetaData';
+export * from './dataobject/dataObjects';
+export * from './dataobject/ValueDo';
+export * from './dataobject/DoRegistry';
 export * from './ajax/ajax';
 export * from './ajax/AjaxCall';
 export * from './ajax/AjaxError';
@@ -117,6 +136,7 @@ export * from './uinotification/TopicDo';
 export * from './uinotification/uiNotifications';
 export * from './uinotification/UiNotificationDo';
 export * from './uinotification/UiNotificationResponse';
+export * from './uinotification/UiNotificationRequest';
 export * from './uinotification/UiNotificationEvent';
 export * from './uinotification/UiNotificationSystem';
 export * from './uinotification/UiNotificationPoller';
@@ -144,9 +164,6 @@ export * from './code/CodeTypeCacheEventMap';
 export * from './code/CodeLookupCall';
 export * from './config/ConfigProperties';
 export * from './config/ConfigPropertyCache';
-export * from './dataobject/DoEntity';
-export * from './dataobject/dataObjects';
-export * from './dataobject/ValueDo';
 export * from './security/access';
 export * from './security/AccessControl';
 export * from './security/Permission';

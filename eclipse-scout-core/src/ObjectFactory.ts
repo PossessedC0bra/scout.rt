@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {FullModelOf, InitModelOf, ModelOf, ObjectModel, objects, scout, TypeDescriptor, TypeDescriptorOptions} from './index';
+import {AbstractConstructor, BaseDoEntity, Constructor, FullModelOf, Id, InitModelOf, ModelOf, ObjectModel, objects, scout, TypeDescriptor, TypeDescriptorOptions} from './index';
 import $ from 'jquery';
 
 export type ObjectCreator = (model?: any) => object;
@@ -164,10 +164,11 @@ export class ObjectFactory {
     options.model = model;
 
     // Create object
-    let scoutObject = this._createObjectByType(objectType, options);
+    const scoutObject = this._createObjectByType(objectType, options);
+    const ensureUniqueId = scout.nvl(options.ensureUniqueId, !(scoutObject instanceof BaseDoEntity || scoutObject instanceof Id) /* don't create unique IDs for DOs and IDs by default */);
     if (objects.isFunction(scoutObject.init)) {
       if (model) {
-        if (model.id === undefined && scout.nvl(options.ensureUniqueId, true)) {
+        if (model.id === undefined && ensureUniqueId) {
           model.id = this.createUniqueId();
         }
         model.objectType = this.getObjectType(objectType);
@@ -176,7 +177,7 @@ export class ObjectFactory {
       scoutObject.init(model);
     }
 
-    if (scoutObject.id === undefined && scout.nvl(options.ensureUniqueId, true)) {
+    if (scoutObject.id === undefined && ensureUniqueId) {
       scoutObject.id = this.createUniqueId();
     }
     if (scoutObject.objectType === undefined) {
@@ -195,11 +196,11 @@ export class ObjectFactory {
     return 'ui' + (++this.uniqueIdSeqNo).toString();
   }
 
-  resolveTypedObjectType(objectType: ObjectType): ObjectType {
+  resolveTypedObjectType<T>(objectType: ObjectType<T>): ObjectType<T> {
     if (typeof objectType !== 'string') {
       return objectType;
     }
-    let Class = TypeDescriptor.resolveType(objectType);
+    let Class = TypeDescriptor.resolveType(objectType) as Constructor<T>;
     if (Class) {
       return Class;
     }
@@ -240,6 +241,24 @@ export class ObjectFactory {
       return Class;
     }
     return this._objectTypeMap.get(Class);
+  }
+
+  /**
+   * @param baseClass The base class (exclusive) for which all known subclasses should be returned.
+   * @returns All classes that have the given class in their super hierarchy. The given baseClass is not part of the result.
+   * More formally: all constructors known to this factory that have the given class in their prototype chain.
+   */
+  getSubClassesOf<T extends object>(baseClass: Constructor<T> | AbstractConstructor<T>): Constructor<T>[] {
+    const result: Constructor<T>[] = [];
+    if (!baseClass) {
+      return result;
+    }
+    for (let obj of this._objectTypeMap.keys()) {
+      if (baseClass.isPrototypeOf(obj)) {
+        result.push(obj as Constructor<T>);
+      }
+    }
+    return result;
   }
 
   /**

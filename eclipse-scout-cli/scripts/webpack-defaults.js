@@ -10,10 +10,13 @@
 const fs = require('fs');
 const path = require('path');
 const scoutBuildConstants = require('./constants');
+const DataObjectTransformer = require('./DataObjectTransformer');
+const ModuleNamespaceResolver = require('./ModuleNamespaceResolver');
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const AfterEmitWebpackPlugin = require('./AfterEmitWebpackPlugin');
 const {SourceMapDevToolPlugin, WatchIgnorePlugin, ProgressPlugin} = require('webpack');
+const ts = require('typescript');
 
 /**
  * @param {string} args.mode development or production
@@ -76,13 +79,22 @@ module.exports = (env, args) => {
   };
 
   const transpileOnly = typeCheck === 'fork' ? true : !typeCheck;
+  const namespaceResolver = new ModuleNamespaceResolver();
+  const getCustomTransformers = program => ({
+    before: [ctx => {
+      const doTransformer = new DataObjectTransformer(program, ctx, namespaceResolver);
+      return node => ts.visitNode(node, node => doTransformer.transform(node));
+    }]
+  });
+  getCustomTransformers.namespaceResolver = namespaceResolver;
   const tsOptions = {
     ...args.tsOptions,
     transpileOnly: transpileOnly,
     compilerOptions: {
       noEmit: false,
       ...args.tsOptions?.compilerOptions
-    }
+    },
+    getCustomTransformers
   };
 
   const config = {

@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import {DoEntity, EnumObject, FullModelOf, InitModelOf, ObjectModel, ObjectOrModel, scout, SomeRequired, strings} from '../index';
+import {EnumObject, FullModelOf, InitModelOf, ObjectModel, ObjectOrModel, scout, SomeRequired, strings} from '../index';
 
 export class Permission implements PermissionModel {
   declare self: Permission;
@@ -95,7 +95,7 @@ export class Permission implements PermissionModel {
   }
 }
 
-export interface PermissionModel extends ObjectModel<Permission>, DoEntity {
+export interface PermissionModel extends ObjectModel<Permission> {
   /**
    * The identifier of the {@link Permission}.
    */

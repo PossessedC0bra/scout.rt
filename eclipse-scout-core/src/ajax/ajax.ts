@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {AjaxCall, AjaxCallModel, AjaxError, scout} from '../index';
+import {AjaxCall, AjaxCallModel, AjaxError, BaseDoEntity, dataObjects, DoEntity, scout} from '../index';
 import $ from 'jquery';
 
 /**
@@ -26,7 +26,7 @@ export const ajax = {
   get(url: string, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'GET'
+      method: 'GET'
     }, options);
     return ajax.call(opts, model);
   },
@@ -43,7 +43,7 @@ export const ajax = {
   post(url: string, data?: any, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'POST',
+      method: 'POST',
       data: data
     }, options);
     return ajax.call(opts, model);
@@ -61,7 +61,7 @@ export const ajax = {
   put(url: string, data?: any, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'PUT',
+      method: 'PUT',
       data: data
     }, options);
     return ajax.call(opts, model);
@@ -78,7 +78,7 @@ export const ajax = {
   remove(url: string, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'DELETE'
+      method: 'DELETE'
     }, options);
     return ajax.call(opts, model);
   },
@@ -94,7 +94,7 @@ export const ajax = {
   getJson(url: string, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'GET'
+      method: 'GET'
     }, options);
     return ajax.callJson(opts, model);
   },
@@ -114,7 +114,7 @@ export const ajax = {
     }
     let opts = $.extend({}, {
       url: url,
-      type: 'POST',
+      method: 'POST',
       data: data
     }, options);
     return ajax.callJson(opts, model);
@@ -135,7 +135,7 @@ export const ajax = {
     }
     let opts = $.extend({}, {
       url: url,
-      type: 'PUT',
+      method: 'PUT',
       data: data
     }, options);
     return ajax.callJson(opts, model);
@@ -152,7 +152,7 @@ export const ajax = {
   removeJson(url: string, options?: JQuery.AjaxSettings, model?: AjaxCallModel): JQuery.Promise<any, AjaxError> {
     let opts = $.extend({}, {
       url: url,
-      type: 'DELETE'
+      method: 'DELETE'
     }, options);
     return ajax.callJson(opts, model);
   },
@@ -192,11 +192,38 @@ export const ajax = {
    */
   createCallJson(options?: JQuery.UrlAjaxSettings, model?: AjaxCallModel): AjaxCall {
     let opts = $.extend({}, {
-      type: 'POST',
+      method: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=UTF-8'
     }, options);
     return ajax.createCall(opts, model);
+  },
+
+  getDataObject<TDoOut extends BaseDoEntity>(url?: string | JQuery.UrlAjaxSettings, model?: AjaxCallModel): JQuery.Promise<TDoOut, AjaxError> {
+    const urlAjaxSettings = typeof url === 'string' ? {url: url} : url;
+    const opts: JQuery.UrlAjaxSettings = $.extend({}, {method: 'GET'}, urlAjaxSettings);
+    return ajax.callDataObject(null, opts, model);
+  },
+
+  postDataObject<TDoIn extends BaseDoEntity | void, TDoOut extends BaseDoEntity | void>(dataObject: TDoIn, url?: string | JQuery.UrlAjaxSettings, model?: AjaxCallModel): JQuery.Promise<TDoOut, AjaxError> {
+    const urlAjaxSettings = typeof url === 'string' ? {url: url} : url;
+    const opts: JQuery.UrlAjaxSettings = $.extend({}, {method: 'POST'}, urlAjaxSettings);
+    return ajax.callDataObject(dataObject, opts, model);
+  },
+
+  callDataObject<TDoIn extends BaseDoEntity | void, TDoOut extends BaseDoEntity | void>(dataObject: TDoIn, options?: JQuery.UrlAjaxSettings, model?: AjaxCallModel): JQuery.Promise<TDoOut, AjaxError> {
+    return ajax.createCallDataObject(dataObject, options, model).call();
+  },
+
+  createCallDataObject(dataObject: DoEntity | void, urlAjaxSettings?: JQuery.UrlAjaxSettings, model?: AjaxCallModel): AjaxCall {
+    const json = dataObject ? dataObjects.stringify(dataObject) : undefined;
+    const opts: JQuery.UrlAjaxSettings = $.extend({}, {
+      converters: {
+        'text json': data => dataObjects.parse(data)
+      },
+      data: json
+    }, urlAjaxSettings);
+    return this.createCallJson(opts, model);
   },
 
   /**

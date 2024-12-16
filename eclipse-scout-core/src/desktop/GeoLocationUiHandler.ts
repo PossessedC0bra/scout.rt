@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {Desktop, DoEntity, UiCallbackErrorDo, UiCallbackHandler} from '../index';
+import {BaseDoEntity, Desktop, DoEntity, scout, typeName, UiCallbackErrorDo, UiCallbackHandler} from '../index';
 
 export class GeoLocationUiHandler implements UiCallbackHandler {
   handle(callbackId: string, owner: Desktop, request: DoEntity): JQuery.Promise<GeoLocationResponse> {
@@ -23,23 +23,22 @@ export class GeoLocationUiHandler implements UiCallbackHandler {
   }
 
   protected _positionSuccess(position: GeolocationPosition): GeoLocationResponse {
-    return {
-      _type: 'scout.GeoLocationResponse',
+    return scout.create(GeoLocationResponse, {
       latitude: '' + position.coords.latitude,
       longitude: '' + position.coords.longitude
-    };
+    });
   }
 
   protected _positionError(positionError: GeolocationPositionError): UiCallbackErrorDo {
-    return {
-      _type: 'scout.UiCallbackError',
+    return scout.create(UiCallbackErrorDo, {
       message: positionError.message,
       code: '' + positionError.code
-    };
+    });
   }
 }
 
-export interface GeoLocationResponse extends DoEntity {
+@typeName('scout.GeoLocationResponse')
+export class GeoLocationResponse extends BaseDoEntity {
   latitude?: string;
   longitude?: string;
 }

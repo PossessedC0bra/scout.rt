@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {dataObjects, DoEntity, Table} from '../index';
+import {BaseDoEntity, dataObjects, DoEntity, scout, Table, typeName} from '../index';
 
 export class TableMaxResultsHelper {
 
@@ -44,10 +44,9 @@ export class TableMaxResultsHelper {
   buildMaxRowCountContribution(table: Table): MaxRowCountContributionDo {
     const maxOutlineRowCount = this.getMaxTableRowCount(table);
     if (maxOutlineRowCount > 0) {
-      return {
-        _type: 'scout.MaxRowCountContribution',
+      return scout.create(MaxRowCountContributionDo, {
         hint: maxOutlineRowCount
-      };
+      });
     }
     return null;
   }
@@ -60,7 +59,8 @@ export class TableMaxResultsHelper {
   }
 }
 
-export interface MaxRowCountContributionDo extends DoEntity {
+@typeName('scout.MaxRowCountContribution')
+export class MaxRowCountContributionDo extends BaseDoEntity {
   override?: number;
   hint?: number;
 }

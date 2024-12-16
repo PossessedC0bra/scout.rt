@@ -35,11 +35,10 @@ describe('UiCallbacks', () => {
   });
 
   it('uses UiCallbackErrorDo returned by handler', done => {
-    const err: UiCallbackErrorDo = {
-      _type: 'scout.UiCallbackError',
+    const err = scout.create(UiCallbackErrorDo, {
       message: 'Test Error',
       code: 'Test Code'
-    };
+    });
 
     class UiCallbackHandlerReturningError implements UiCallbackHandler {
       handle(callbackId: string, owner: Desktop, request: DoEntity): JQuery.Promise<DoEntity> {
@@ -66,11 +65,10 @@ describe('UiCallbacks', () => {
     expectUiCallbackResponse(RejectedUiCallbackHandler, callbackId, {
       id: callbackId,
       data: null,
-      error: {
-        _type: 'scout.UiCallbackError',
+      error: scout.create(UiCallbackErrorDo, {
         message: 'Test Error',
         code: 'P4'
-      }
+      })
     }).then(() => done());
   });
 
@@ -85,11 +83,10 @@ describe('UiCallbacks', () => {
     expectUiCallbackResponse(ThrowingUiCallbackHandler, callbackId, {
       id: callbackId,
       data: null,
-      error: {
-        _type: 'scout.UiCallbackError',
+      error: scout.create(UiCallbackErrorDo, {
         message: 'Test Error',
         code: 'P4'
-      }
+      })
     }).then(() => done());
   });
 

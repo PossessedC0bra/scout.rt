@@ -8,8 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import {DoEntity} from '../..';
+import {BaseDoEntity, typeName} from '../..';
 
-export interface DisposeWidgetsHybridActionDo extends DoEntity {
+@typeName('scout.DisposeWidgetsHybridAction')
+export class DisposeWidgetsHybridActionDo extends BaseDoEntity {
   ids: string[];
 }

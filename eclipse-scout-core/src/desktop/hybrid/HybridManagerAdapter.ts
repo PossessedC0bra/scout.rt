@@ -46,11 +46,12 @@ export class HybridManagerAdapter extends ModelAdapter {
       let outline = page.getOutline();
       event.data.data['_page'] = outline.modelAdapter.id + '/' + page.id;
     }
+    let contextElements = this._contextElementsToJson(event.data.contextElements);
     this._send('hybridAction', {
       actionType: event.data.actionType, // add as first property (devtools sometimes show properties in that order)
       id: event.data.id,
       data: event.data.data,
-      contextElements: this._contextElementsToJson(event.data.contextElements) || undefined
+      contextElements: contextElements || undefined
     });
   }
 

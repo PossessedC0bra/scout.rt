@@ -646,7 +646,7 @@ export class Session extends EventEmitter implements SessionModel, ModelAdapterL
     let url = this._decorateUrl(this.remoteUrl, request);
 
     let ajaxOptions: JQuery.UrlAjaxSettings = {
-      type: 'POST',
+      method: 'POST',
       dataType: 'json',
       contentType: 'application/json; charset=UTF-8',
       cache: false,
@@ -1203,7 +1203,7 @@ export class Session extends EventEmitter implements SessionModel, ModelAdapterL
     }
 
     let uploadAjaxOptions: JQuery.UrlAjaxSettings = {
-      type: 'POST',
+      method: 'POST',
       url: 'upload/' + this.uiSessionId + '/' + target.id,
       cache: false,
       // Don't touch the data (do not convert it to string)

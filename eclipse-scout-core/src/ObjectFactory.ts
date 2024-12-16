@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {FullModelOf, InitModelOf, ModelOf, ObjectModel, objects, scout, TypeDescriptor, TypeDescriptorOptions} from './index';
+import {AbstractConstructor, Constructor, FullModelOf, InitModelOf, ModelOf, ObjectModel, objects, scout, TypeDescriptor, TypeDescriptorOptions} from './index';
 import $ from 'jquery';
 
 export type ObjectCreator = (model?: any) => object;
@@ -195,11 +195,11 @@ export class ObjectFactory {
     return 'ui' + (++this.uniqueIdSeqNo).toString();
   }
 
-  resolveTypedObjectType(objectType: ObjectType): ObjectType {
+  resolveTypedObjectType<T>(objectType: ObjectType<T>): ObjectType<T> {
     if (typeof objectType !== 'string') {
       return objectType;
     }
-    let Class = TypeDescriptor.resolveType(objectType);
+    let Class = TypeDescriptor.resolveType(objectType) as Constructor<T>;
     if (Class) {
       return Class;
     }
@@ -240,6 +240,24 @@ export class ObjectFactory {
       return Class;
     }
     return this._objectTypeMap.get(Class);
+  }
+
+  /**
+   * @param baseClass The base class (exclusive) for which all known subclasses should be returned.
+   * @returns All classes that have the given class in their super hierarchy. The given baseClass is not part of the result.
+   * More formally: all constructors known to this factory that have the given class in their prototype chain.
+   */
+  getSubClassesOf<T extends object>(baseClass: Constructor<T> | AbstractConstructor<T>): Constructor<T>[] {
+    const result: Constructor<T>[] = [];
+    if (!baseClass) {
+      return result;
+    }
+    for (let obj of this._objectTypeMap.keys()) {
+      if (baseClass.isPrototypeOf(obj)) {
+        result.push(obj as Constructor<T>);
+      }
+    }
+    return result;
   }
 
   /**

@@ -33,7 +33,7 @@ export const JasmineScoutUtil = {
 
     return $.ajax({
       async: false,
-      type: 'GET',
+      method: 'GET',
       dataType: 'json',
       contentType: 'application/json; charset=UTF-8',
       cache: false,

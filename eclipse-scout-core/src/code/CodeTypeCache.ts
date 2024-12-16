@@ -7,7 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {ajax, AjaxCall, arrays, CodeType, CodeTypeCacheEventMap, CodeTypeChangeEvent, CodeTypeRemoveEvent, DoEntity, EventEmitter, ObjectModel, ObjectOrModel, objects, systems, UiNotificationEvent, uiNotifications} from '../index';
+import {
+  ajax, AjaxCall, arrays, BaseDoEntity, CodeModel, CodeType, CodeTypeCacheEventMap, CodeTypeChangeEvent, CodeTypeModel, CodeTypeRemoveEvent, EventEmitter, ObjectModel, ObjectOrModel, objects, scout, systems, typeName, UiNotificationEvent,
+  uiNotifications
+} from '../index';
 import $ from 'jquery';
 
 /**
@@ -70,15 +73,13 @@ export class CodeTypeCache extends EventEmitter implements ObjectModel<CodeTypeC
     if (!this.url) {
       return $.resolvedPromise([]);
     }
-    const request: CodeTypeRequest = codeTypeIds?.length ? {
-      _type: 'scout.CodeTypeRequest',
+    const request = codeTypeIds?.length ? scout.create(CodeTypeRequest, {
       codeTypeIds
-    } : null;
+    }) : null;
     this._call?.abort(); // abort in case there is already a call running
-    this._call = ajax.createCallJson({
+    this._call = ajax.createCallDataObject(request, {
       url: this.url,
-      type: 'PUT',
-      data: JSON.stringify(request)
+      method: 'PUT'
     }, {
       maxRetries: -1, // unlimited retries, ensure the cache will be updated eventually in case of network errors
       retryIntervals: [300, 500, 1000, 5000]
@@ -189,14 +190,52 @@ export class CodeTypeCache extends EventEmitter implements ObjectModel<CodeTypeC
   }
 }
 
-export interface CodeTypeUpdateMessageDo extends DoEntity {
-  codeTypes?: ObjectOrModel<CodeType<any, any, any>>[];
+@typeName('scout.CodeTypeUpdateMessage')
+export class CodeTypeUpdateMessageDo extends BaseDoEntity {
+  codeTypes?: CodeTypeDo[];
   codeTypeIds?: string[];
   reloadDelayWindow?: number;
 }
 
-export interface CodeTypeRequest extends DoEntity {
+@typeName('scout.CodeTypeRequest')
+export class CodeTypeRequest extends BaseDoEntity {
   codeTypeIds?: string[];
+}
+
+@typeName('scout.Code')
+export class CodeDo extends BaseDoEntity implements CodeModel<any> {
+  id?: string;
+  objectType?: string;
+  modelClass?: string;
+  active?: boolean;
+  enabled?: boolean;
+  iconId?: string;
+  tooltipText?: string;
+  backgroundColor?: string;
+  foregroundColor?: string;
+  font?: string;
+  cssClass?: string;
+  extKey?: string;
+  value?: number;
+  partitionId?: number;
+  sortCode?: number;
+  fieldName?: string;
+  text?: string;
+  texts?: Record<string, string>;
+  children?: CodeDo[];
+}
+
+@typeName('scout.CodeType')
+export class CodeTypeDo extends BaseDoEntity implements CodeTypeModel {
+  id?: string;
+  objectType?: string;
+  modelClass?: string;
+  iconId?: string;
+  hierarchical?: boolean;
+  maxLevel?: number;
+  texts?: Record<string, string>;
+  textsPlural?: Record<string, string>;
+  codes?: CodeDo[];
 }
 
 export const codes: CodeTypeCache = objects.createSingletonProxy(CodeTypeCache);

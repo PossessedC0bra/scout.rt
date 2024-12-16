@@ -77,6 +77,10 @@ public class IdCodec {
     SIGNATURE
   }
 
+  protected enum InternalIdCodecFlag implements IIdCodecFlag {
+    TYPE_NAME_PROCESSED
+  }
+
   @PostConstruct
   protected void initialize() {
     // setup default type mappings between raw type <--> string
@@ -316,10 +320,9 @@ public class IdCodec {
         //noinspection deprecation
         return UnknownId.of(null, qualifiedId);
       }
-      else {
-        throw new IdCodecException("Qualified id '{}' format is invalid", qualifiedId);
-      }
+      throw new IdCodecException("Qualified id '{}' format is invalid", qualifiedId);
     }
+
     String typeName = tmp[0];
     Class<? extends IId> idClass = idInventory().getIdClass(typeName);
     if (idClass == null) {
@@ -327,13 +330,13 @@ public class IdCodec {
         //noinspection deprecation
         return UnknownId.of(typeName, tmp[1]);
       }
-      else {
-        throw new IdCodecException("No class found for type name '{}'", typeName);
-      }
+      throw new IdCodecException("No class found for type name '{}'", typeName);
     }
 
+    Set<IIdCodecFlag> unqualifiedFlags = hashSet(flags);
+    unqualifiedFlags.add(InternalIdCodecFlag.TYPE_NAME_PROCESSED); // typeName has already been processed
     try {
-      return fromUnqualified(idClass, tmp[1], flags);
+      return fromUnqualified(idClass, tmp[1], unqualifiedFlags);
     }
     catch (Exception e) {
       // handle any deserialization issues in lenient mode by retaining the raw id as UnknownId instance
@@ -355,9 +358,41 @@ public class IdCodec {
    */
   protected <ID extends IId> ID fromUnqualifiedUnchecked(Class<ID> idClass, String unqualifiedId, Set<IIdCodecFlag> flags) {
     unqualifiedId = removeSignature(idClass, unqualifiedId, flags);
+    unqualifiedId = removeTypeNamePrefix(idClass, unqualifiedId, flags);
     String[] rawComponents = unqualifiedId.split(";", -1 /* force empty strings for empty components */);
     Object[] components = parseComponents(idClass, rawComponents, flags);
     return idFactory().createInternal(idClass, components);
+  }
+
+  /**
+   * Removes the typeName of the given ID class if the unqualifiedId contains it.
+   * <p>
+   * This is required to allow sending too much information: Java only requires unqualified, but a qualified ID is
+   * given. If this is the case: ignore the typeName.
+   *
+   * @param idClass
+   *     The class of the id.
+   * @param unqualifiedId
+   *     The unqualified id string which may include the typeName prefix.
+   * @param flags
+   *     The processing flags
+   * @return The unqualified id string with the typeName prefix removed.
+   */
+  protected <ID extends IId> String removeTypeNamePrefix(Class<ID> idClass, String unqualifiedId, Set<IIdCodecFlag> flags) {
+    boolean isTypeNameProcessed = isOneOf(InternalIdCodecFlag.TYPE_NAME_PROCESSED, flags);
+    if (isTypeNameProcessed) {
+      // typeName has already been processed: no need to remove anything
+      return unqualifiedId;
+    }
+    String expectedTypeName = idInventory().getTypeName(idClass);
+    if (StringUtility.isNullOrEmpty(expectedTypeName)) {
+      return unqualifiedId;
+    }
+    String prefix = expectedTypeName + ID_TYPENAME_DELIMITER;
+    if (!unqualifiedId.startsWith(prefix)) {
+      return unqualifiedId;
+    }
+    return unqualifiedId.substring(prefix.length());
   }
 
   /**
@@ -394,7 +429,8 @@ public class IdCodec {
   }
 
   /**
-   * Checks if the two given {@link Object}s are equal and throws an {@link IdCodecException} with the given message if they are not equal.
+   * Checks if the two given {@link Object}s are equal and throws an {@link IdCodecException} with the given message if
+   * they are not equal.
    */
   protected void checkEquals(Object o1, Object o2, String message) {
     if (!Objects.equals(o1, o2)) {

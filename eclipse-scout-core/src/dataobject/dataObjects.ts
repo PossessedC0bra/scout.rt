@@ -7,10 +7,54 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
-import {arrays, DoEntity, objects, scout} from '..';
+import {
+  ArrayDoNodeSerializer, arrays, DateDoNodeSerializer, DoDeserializer, DoEntity, DoNodeSerializer, DoSerializer, doValueMetaData, IdDoNodeSerializer, MapDoNodeSerializer, objects, ObjectType, scout, SetDoNodeSerializer
+} from '../index';
 
 export const dataObjects = {
+
+  serializers: [
+    new DateDoNodeSerializer(),
+    new IdDoNodeSerializer(),
+    new MapDoNodeSerializer(),
+    new SetDoNodeSerializer(),
+    new ArrayDoNodeSerializer()
+  ] as DoNodeSerializer<any>[],
+
+  stringify(dataObject: any): string {
+    const serialized = dataObjects.serialize(dataObject);
+    if (!serialized) {
+      return null;
+    }
+    return JSON.stringify(serialized);
+  },
+
+  serialize(dataObject: any): any {
+    if (!dataObject) {
+      return null;
+    }
+    return scout.create(DoSerializer).serialize(dataObject);
+  },
+
+  parse<T extends DoEntity | DoEntity[]>(json: string, objectType?: ObjectType<T>): T {
+    if (!json) {
+      return null;
+    }
+    const value = JSON.parse(json);
+    return dataObjects.deserialize(value, objectType);
+  },
+
+  deserialize<T extends DoEntity | DoEntity[]>(obj: any, objectType?: ObjectType<T>): T {
+    if (!obj) {
+      return null;
+    }
+    // convert string to constructor if possible as the datatype metadata would be on the constructor
+    const metaData = doValueMetaData.resolveFieldMetaData(objectType);
+
+    const deserializer = scout.create(DoDeserializer);
+    return deserializer.deserialize(obj, metaData);
+  },
+
   /**
    * @returns the DO entity contribution for the given contribution class or type.
    */

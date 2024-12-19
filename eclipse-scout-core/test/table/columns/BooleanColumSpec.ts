@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {BooleanColumn, Cell, TableRow} from '../../../src/index';
+import {BooleanColumn, Cell, CheckBoxField, scout, Table, TableCompleteCellEditEvent, TablePrepareCellEditEvent, TableRow} from '../../../src/index';
 import {JQueryTesting, TableSpecHelper} from '../../../src/testing/index';
 
 describe('BooleanColumn', () => {
@@ -255,6 +255,114 @@ describe('BooleanColumn', () => {
 
       column0.onMouseUp({} as JQuery.MouseUpEvent, table.rows[0].$row);
       expect(table.$cell(column0, table.rows[0].$row).children('.check-box')).toHaveAttr('aria-checked', 'false');
+    });
+  });
+
+  describe('editable', () => {
+    let table: Table;
+    let booleanColumn: BooleanColumn;
+    let row0: TableRow;
+    let row1: TableRow;
+
+    beforeEach(() => {
+      let columnModels = helper.createModelColumns(1, BooleanColumn);
+      let rowModels = [
+        helper.createModelRowByValues('row0', [true]),
+        helper.createModelRowByValues('row1', [false])
+      ];
+      let tableModel = helper.createModel(columnModels, rowModels);
+
+      table = helper.createTable(tableModel);
+      booleanColumn = scout.assertInstance(table.columns[0], BooleanColumn);
+      row0 = table.rows[0];
+      row1 = table.rows[1];
+
+      table.render();
+      helper.applyDisplayStyle(table);
+    });
+
+    it('mouse click does nothing if column is not editable', () => {
+      booleanColumn.setEditable(false);
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row0.$row);
+      expect(booleanColumn.cell(row0).text).toBe('X');
+      expect(booleanColumn.cell(row0).value).toBe(true);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).toHaveClass('checked');
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row1.$row);
+      expect(booleanColumn.cell(row1).text).toBe('');
+      expect(booleanColumn.cell(row1).value).toBe(false);
+      expect(table.$cell(booleanColumn, row1.$row).children('.check-box')).not.toHaveClass('checked');
+    });
+
+    it('mouse click emits events and toggles cell value', () => {
+      let prepareCellEditEvents: TablePrepareCellEditEvent[] = [];
+      table.on('prepareCellEdit', event => {
+        prepareCellEditEvents.push(event);
+      });
+      let completeCellEditEvents: TableCompleteCellEditEvent[] = [];
+      table.on('completeCellEdit', event => {
+        completeCellEditEvents.push(event);
+      });
+
+      expect(booleanColumn.cell(row0).text).toBe('X');
+      expect(booleanColumn.cell(row0).value).toBe(true);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).toHaveClass('checked');
+
+      booleanColumn.setEditable(true);
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row0.$row);
+      expect(booleanColumn.cell(row0).text).toBe('');
+      expect(booleanColumn.cell(row0).value).toBe(false);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).not.toHaveClass('checked');
+      expect(table.cellEditorPopup).toBe(null); // no cell editor!
+
+      expect(prepareCellEditEvents.length).toBe(1);
+      expect(prepareCellEditEvents[0].column).toBe(booleanColumn);
+      expect(prepareCellEditEvents[0].row).toBe(row0);
+      expect(completeCellEditEvents.length).toBe(1);
+      expect(completeCellEditEvents[0].column).toBe(booleanColumn);
+      expect(completeCellEditEvents[0].row).toBe(row0);
+      expect(completeCellEditEvents[0].cell).toBe(row0.cells[0]);
+      expect(completeCellEditEvents[0].field).toBeInstanceOf(CheckBoxField);
+      expect(completeCellEditEvents[0].field.value).toBe(false);
+    });
+
+    it('events can be intercepted, cell value is not changed', () => {
+      booleanColumn.setEditable(true);
+
+      let defaultPrevented = false;
+      let preventDefaultListener = event => {
+        event.preventDefault();
+        defaultPrevented = true;
+      };
+
+      table.on('prepareCellEdit', preventDefaultListener);
+
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row0.$row);
+      expect(booleanColumn.cell(row0).text).toBe('X');
+      expect(booleanColumn.cell(row0).value).toBe(true);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).toHaveClass('checked');
+      expect(table.cellEditorPopup).toBe(null);
+      expect(defaultPrevented).toBe(true);
+
+      defaultPrevented = false;
+      table.off('prepareCellEdit', preventDefaultListener);
+      table.on('completeCellEdit', preventDefaultListener);
+
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row0.$row);
+      expect(booleanColumn.cell(row0).text).toBe('X');
+      expect(booleanColumn.cell(row0).value).toBe(true);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).toHaveClass('checked');
+      expect(table.cellEditorPopup).toBe(null);
+      expect(defaultPrevented).toBe(true);
+
+      defaultPrevented = false;
+      table.off('completeCellEdit', preventDefaultListener);
+
+      booleanColumn.onMouseUp({} as JQuery.MouseUpEvent, row0.$row);
+      expect(booleanColumn.cell(row0).text).toBe('');
+      expect(booleanColumn.cell(row0).value).toBe(false);
+      expect(table.$cell(booleanColumn, row0.$row).children('.check-box')).not.toHaveClass('checked');
+      expect(table.cellEditorPopup).toBe(null);
+      expect(defaultPrevented).toBe(false);
     });
   });
 });

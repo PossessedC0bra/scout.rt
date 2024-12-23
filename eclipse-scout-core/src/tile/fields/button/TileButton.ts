@@ -98,9 +98,4 @@ export class TileButton extends Button {
       tooltips.uninstall(this.$container);
     }
   }
-
-  protected override _renderLabelVisible() {
-    super._renderLabelVisible();
-    this._renderChildVisible(this.$buttonLabel, this.labelVisible);
-  }
 }

@@ -321,6 +321,11 @@ export class Button extends FormField implements ButtonModel {
     this.invalidateLayoutTree();
   }
 
+  protected override _renderLabelVisible() {
+    super._renderLabelVisible();
+    this._updateLabelAndIconStyle();
+  }
+
   setIconId(iconId: string) {
     this.setProperty('iconId', iconId);
   }
@@ -374,9 +379,14 @@ export class Button extends FormField implements ButtonModel {
     let hasIcon = !!this.iconId;
     let hasSubMenuIcon = !!this.$submenuIcon;
     let hasAnyIcon = hasIcon || hasSubMenuIcon;
-    this.$buttonLabel.setVisible(hasText || !hasAnyIcon);
-    this.$submenuIcon?.toggleClass('with-label', hasText);
-    this.get$Icon().toggleClass('with-label', hasText);
+
+    // Buttons without text and icons but labelVisible=true should still display the label (it will contain '&nsbp;', see _renderLabel)
+    let showButtonLabel = this.labelVisible && (hasText || !hasAnyIcon);
+
+    this._renderChildVisible(this.$buttonLabel, showButtonLabel);
+
+    this.$submenuIcon?.toggleClass('with-label', showButtonLabel);
+    this.get$Icon().toggleClass('with-label', showButtonLabel);
   }
 
   setKeyStroke(keyStroke: string) {
